@@ -14,7 +14,6 @@ public class RatingService {
 
     private final RatingRepository ratingRepository;
 
-//    @CachePut(key = "#rating.id")
     public void save(Rating rating) {
         ratingRepository.save(rating);
     }

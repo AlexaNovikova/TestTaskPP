@@ -21,20 +21,18 @@ public class FilmService {
 
     private final FilmRepository filmRepository;
     private final RatingRepository ratingRepository;
-//
-//    @Cacheable
+
+    @Cacheable
     public Page<FilmDto> findAll(String date, int page, int pageSize) {
         System.out.println(date.toString());
         return ratingRepository.findAllByDate(date, PageRequest.of(page - 1, pageSize)).map(FilmDto::new);
 
     }
 
-//   @CachePut(key = "#film.id")
     public void save(Film film) {
         filmRepository.save(film);
     }
 
-//   @Cacheable
     public Optional<Film> findByTitle(String title) {
         return filmRepository.findByTitle(title);
     }
