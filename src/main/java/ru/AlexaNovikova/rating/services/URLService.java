@@ -14,6 +14,8 @@ import ru.AlexaNovikova.rating.parser.ElementParser;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+
 
 @Service
 @RequiredArgsConstructor
@@ -33,26 +35,27 @@ public class URLService {
 
     public void addFilmsToDB() {
         System.out.println("Выполенено заполнение DB");
-        Document doc;
         try {
-            File input = new File("kinopoisk.html");
-            doc = Jsoup.parse(input, "UTF-8", "https://www.kinopoisk.ru/lists/top250/");
-            String title = doc.title();
-            Elements elements = doc.select("div.desktop-rating-selection-film-item");
-            System.out.println(title);
-            for (
-                    Element element : elements) {
-                Rating rating = ElementParser.parseElementToRating(element);
-                Film film = ElementParser.parseElementToFilm(element);
-                if (!filmService.findByTitle(film.getTitle()).isPresent()) {
-                    filmService.save(film);
+            Document doc = null;
+                doc = Jsoup.connect("https://www.kinopoisk.ru/lists/top250/").get();
+                String title = doc.title();
+                System.out.println(title);
+                Elements elements = doc.select("div.desktop-rating-selection-film-item");
+                System.out.println(title);
+                for (
+                        Element element : elements) {
+                    Rating rating = ElementParser.parseElementToRating(element);
+                    Film film = ElementParser.parseElementToFilm(element);
+                    if (!filmService.findByTitle(film.getTitle()).isPresent()) {
+                        filmService.save(film);
+                    }
+                    Film filmFromDB = filmService.findByTitle(film.getTitle()).get();
+                    rating.setFilm(filmFromDB);
+                    System.out.println(filmFromDB.getId());
+                    ratingService.save(rating);
                 }
-                Film filmFromDB = filmService.findByTitle(film.getTitle()).get();
-                rating.setFilm(filmFromDB);
-                System.out.println(filmFromDB.getId());
-                ratingService.save(rating);
-            }
-        } catch (IOException e) {
+
+        }catch (IOException e) {
             e.printStackTrace();
         }
     }
